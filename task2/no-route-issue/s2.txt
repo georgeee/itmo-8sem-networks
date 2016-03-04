@@ -1,0 +1,33 @@
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+0.0.0.0         10.27.2.1       0.0.0.0         UG    202    0        0 ens3
+10.27.2.0       0.0.0.0         255.255.255.0   U     202    0        0 ens3
+192.168.0.0     192.168.2.1     255.255.0.0     UG    0      0        0 ens4
+192.168.2.0     0.0.0.0         255.255.255.0   U     0      0        0 ens4
+ens3: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 10.27.2.209  netmask 255.255.255.0  broadcast 10.27.2.255
+        inet6 fe80::ff:fe00:401  prefixlen 64  scopeid 0x20<link>
+        ether 02:00:00:00:04:01  txqueuelen 1000  (Ethernet)
+        RX packets 161  bytes 29611 (28.9 KiB)
+        RX errors 5  dropped 0  overruns 0  frame 5
+        TX packets 30  bytes 3754 (3.6 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+ens4: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.2.2  netmask 255.255.255.0  broadcast 192.168.2.255
+        inet6 fe80::ff:fe00:404  prefixlen 64  scopeid 0x20<link>
+        ether 02:00:00:00:04:04  txqueuelen 1000  (Ethernet)
+        RX packets 220  bytes 31507 (30.7 KiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 229  bytes 17522 (17.1 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+        loop  txqueuelen 0  (Local Loopback)
+        RX packets 2  bytes 168 (168.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 2  bytes 168 (168.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
