@@ -10,5 +10,5 @@ To launch:
 1. Use linux
 2. Install qemu
 3. (Strongly recommended) Turn on VT-X in BIOS (virtualization)
-4. Download [image](https://yadi.sk/d/ZidkdbzHptxAZ)
+4. Download [image](https://yadi.sk/d/U9spB9_XpvVye)
 5. Launch: `./launch.sh -b <path to image>` 
