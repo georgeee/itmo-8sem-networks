@@ -75,7 +75,8 @@ if [[ $type == 'm' ]]; then
   chown -Rf quagga:quagga /var/log/quagga
   ripd_conf | tee /etc/quagga/ripd.conf
   zebra_conf | tee /etc/quagga/zebra.conf
-  if [[ ! $no_quagga ]]; then
+  if $no_quagga; then
+  else
     ripd -d -f /etc/quagga/ripd.conf
     zebra -d -f /etc/quagga/zebra.conf
   fi
