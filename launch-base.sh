@@ -73,3 +73,18 @@ function generate_dev {
   echo -device e1000,netdev=nic.$mac_counter,mac=$mac
   mac_counter=$((mac_counter+1))
 }
+
+while test $# -gt 0
+do
+  case "$1" in
+    -m) mem=$2
+        shift
+        ;;
+    -b) base_img=$2
+        shift
+        ;;
+    *) break
+        ;;
+  esac
+  shift
+done
