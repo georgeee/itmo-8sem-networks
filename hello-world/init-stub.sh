@@ -7,13 +7,6 @@
 id=%id%
 type=%type%
 
-if [[ $id -eq 1 ]]; then
-  p=$subnets$id
-else
-  p=$((id-1))$id
-fi
-n=$id$((id%$subnets+1))
-
 function ensure_dev_up {
   cnt=0
   ret=1

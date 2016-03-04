@@ -7,13 +7,6 @@
 id=%id%
 type=%type%
 
-if [[ $id -eq 1 ]]; then
-  p=$subnets$id
-else
-  p=$((id-1))$id
-fi
-n=$id$((id%$subnets+1))
-
 function ensure_dev_up {
   cnt=0
   ret=1
@@ -39,6 +32,13 @@ function ensure_dev_up {
 subnets=%subnets%
 enable_inet=%enable_inet%
 no_quagga=%no_quagga%
+
+if [[ $id -eq 1 ]]; then
+  p=$subnets$id
+else
+  p=$((id-1))$id
+fi
+n=$id$((id%$subnets+1))
 
 function ripd_conf {
   echo '!'
