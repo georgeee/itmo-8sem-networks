@@ -18,6 +18,7 @@ function ripd_conf {
   echo '!'
   echo 'password krispo'
   echo 'router rip'
+  echo '  timers basic 5 30 20'
   echo 'route 192.168.0.0/16'
   echo 'network 192.168.0.0/16'
   echo 'network ens4'
