@@ -55,7 +55,9 @@ check_bridge() {
 
 create_bridge() {
     do_brctl addbr "$1"
-    sleep 0.5
+    while check_bridge "$1"; do
+      sleep 0.5
+    done
     do_brctl stp "$1" off
     do_brctl setfd "$1" 0
     do_ifconfig "$1" "$GATEWAY" netmask 255.255.255.0 up
