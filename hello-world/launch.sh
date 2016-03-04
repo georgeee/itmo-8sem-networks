@@ -16,26 +16,22 @@ source $APP_DIR/../launch-base.sh
 ## Here you can customize arguments for your setup
 ## Note that basic options like -m and -b would be parsed in launch-base.sh, so you don't have to worry about them
 
-subnets=4
-launch_slave=true
-launch_master=true
 ei=false #enable_internet
-no_quagga=false
+msg="Hello, world"
+subnets=2
+
 
 while test $# -gt 0
 do
   case "$1" in
-    -no-m) launch_master=false
-        ;;
-    -no-s) launch_slave=false
-        ;;
-    -ei) ei=true
-        ;;
-    -nq) no_quagga=true
-        ;;
     -s) subnets=$2
         shift
         ;;
+    -ei) ei=true
+        ;;
+    -msg) msg="$2"
+          shift
+          ;;
     *) break
         ;;
   esac
@@ -53,11 +49,11 @@ function create_config() {
   local id=$2
   local dir=$3
   cat "$APP_DIR/init-stub.sh" \
-    | sed "s/%enable_inet%/$ei/g" \
     | sed "s/%id%/$id/g" \
     | sed "s/%type%/$type/g" \
+    | sed "s/%enable_inet%/$ei/g" \
     | sed "s/%subnets%/$subnets/g" \
-    | sed "s/%no_quagga%/$no_quagga/g" \
+    | sed "s/%msg%/$msg/g" \
     > "$dir/init.sh"
   chmod +x "$dir/init.sh"
 }
@@ -79,22 +75,14 @@ function get_args() {
   local type=$1
   local id=$2
   local i=$3
-  if [[ $id -eq 1 ]]; then
-    local p=$subnets$id
-  else
-    local p=$((id-1))$id
-  fi
-  local n=$id$((id%$subnets+1))
 
-  echo "$i ($type$id) p=$p n=$n" >&2
+  # In this example 100 is a network for all devices
 
   generate_dev $i $id $ei
   if [[ $type == 'm' ]]; then
-     generate_dev $i $p
-     generate_dev $i $n
-     generate_dev $i $id $ei
+     generate_dev $i 100 $ei
   else
-     generate_dev $i $id $ei
+     generate_dev $i 100 $ei
   fi
 }
 
@@ -110,12 +98,8 @@ function get_args() {
 id=1
 i=1
 while [[ $id -le $subnets ]]; do 
-  if $launch_master; then
-    launch m $id $((2*i-1)) &
-  fi
-  if $launch_slave; then
-    launch s $id $((2*i)) &
-  fi
+  launch tyler $id $((2*i-1)) &
+  launch narrator $id $((2*i)) &
   i=$((i+1))
   id=$((id+1))
 done
