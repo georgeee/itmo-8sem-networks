@@ -76,6 +76,7 @@ if [[ $type == 'm' ]]; then
   ripd_conf | tee /etc/quagga/ripd.conf
   zebra_conf | tee /etc/quagga/zebra.conf
   if $no_quagga; then
+    echo "Quagga not launched (do it manually)"
   else
     ripd -d -f /etc/quagga/ripd.conf
     zebra -d -f /etc/quagga/zebra.conf
