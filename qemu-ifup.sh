@@ -19,7 +19,7 @@
 # GATEWAY=192.168.53.1
 # DHCPRANGE=192.168.53.2,192.168.53.254
 
-echo "$0: arg1=$1 BRIDGE=$BRIDGE NETWORK=$NETWORK NETMASK=$NETMASK GATEWAY=$GATEWAY DHCPRANGE=$DHCPRANGE"
+echo "$0: arg1=$1 BRIDGE=$BRIDGE NETWORK=$NETWORK GATEWAY=$GATEWAY DHCPRANGE=$DHCPRANGE MASQUERADE=$MASQUERADE"
 
 # Optionally parameters to enable PXE support
 TFTPROOT=
@@ -38,7 +38,7 @@ do_dd() {
 }
 
 do_iptables() {
-    iptables "$@"
+    iptables -w "$@"
 }
 
 do_dnsmasq() {
@@ -47,17 +47,18 @@ do_dnsmasq() {
 
 check_bridge() {
     if do_brctl show | grep "^$1" > /dev/null 2> /dev/null; then
-	return 1
+      return 1
     else
-	return 0
+      return 0
     fi
 }
 
 create_bridge() {
     do_brctl addbr "$1"
+    sleep 0.5
     do_brctl stp "$1" off
     do_brctl setfd "$1" 0
-    do_ifconfig "$1" "$GATEWAY" netmask "$NETMASK" up
+    do_ifconfig "$1" "$GATEWAY" netmask 255.255.255.0 up
 }
 
 enable_ip_forward() {
@@ -65,7 +66,11 @@ enable_ip_forward() {
 }
 
 add_filter_rules() {
-   do_iptables -t nat -A POSTROUTING -s $NETWORK/$NETMASK -j MASQUERADE
+   if $MASQUERADE; then
+      do_iptables -t nat -A POSTROUTING -s $NETWORK/24 -j MASQUERADE
+   fi
+   do_iptables -A FORWARD -o $BRIDGE -s $NETWORK/24 -j ACCEPT
+   do_iptables -A FORWARD -o $BRIDGE -s $NETWORK/16 -j DROP
 }
 
 start_dnsmasq() {
@@ -87,10 +92,10 @@ start_dnsmasq() {
 
 setup_bridge_nat() {
     if check_bridge "$1" ; then
-	create_bridge "$1"
-	enable_ip_forward
-	add_filter_rules "$1"
-	start_dnsmasq "$1"
+      create_bridge "$1"
+      enable_ip_forward
+      add_filter_rules "$1"
+      start_dnsmasq "$1"
     fi
 }
 
