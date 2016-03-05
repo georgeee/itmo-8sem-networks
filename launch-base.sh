@@ -7,7 +7,7 @@ base_img=$DIR/base.img
 network_script_up=$DIR/qemu-ifup.sh
 network_script_down=$DIR/qemu-ifdown.sh
 
-network_base="10.23"
+network_base="10.24"
 network_mask="255.255.255.0"
 network_br_prefix=qemu-br-
 

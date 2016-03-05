@@ -55,9 +55,12 @@ check_bridge() {
 
 create_bridge() {
     do_brctl addbr "$1"
+    echo "waitning br $1 up"
     while check_bridge "$1"; do
       sleep 0.5
+      echo " repeating... (waitning $1)"
     done
+    do_brctl show | grep "^$1"
     do_brctl stp "$1" off
     do_brctl setfd "$1" 0
     do_ifconfig "$1" "$GATEWAY" netmask 255.255.255.0 up
@@ -114,3 +117,5 @@ if test "$1" ; then
     do_ifconfig "$1" 0.0.0.0 up
     do_brctl addif "$BRIDGE" "$1"
 fi
+
+exit 0
