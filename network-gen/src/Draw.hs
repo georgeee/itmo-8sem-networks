@@ -1,7 +1,7 @@
 module Draw where
 
 import Graphviz
-import Data
+import Env
 import qualified Data.List as L
 import Text.Printf
 import Control.Monad
@@ -13,16 +13,13 @@ instance Graphviz Env where
     buildGraph e  =  "graph environment {\n" ++ entries  ++ "}\n"     
       where
         entries = do
-            entry <- nodesList (envNodes e) ++ edgesList (envBridgesList e)
+            entry <- nodesList (envNodes e) ++ edgesList (envEdges e)
             '\t' : entry ++ "\n"
 
         nodesList :: [Node] -> [String]
-        nodesList = map $ join (printf "%s [label=\"%s\"];") . show
+        nodesList = map $ join $ printf "%s [label=\"%s\"];"
         
-        edgesList :: [Bridge] -> [String]
-        edgesList = (=<<) $ \(Bridge _ nodes) -> 
-            L.tails nodes >>= map printEdge . sequence . (head &&& drop 1)
+        edgesList :: [(Node, Node)] -> [String]
+        edgesList = map $ uncurry $ printf "%s -- %s;" 
         
-        printEdge (n1, n2) = show n1 ++ " -- " ++ show n2 ++ ";"
-            
             

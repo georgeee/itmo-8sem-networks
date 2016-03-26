@@ -15,12 +15,12 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     
-    Data, Draw, Graphviz, Script 
+    Env, Draw, Graphviz, LaunchScript, InitScript, Scripts
   build-depends:       
       base >= 4.7 && < 5,
       mtl, containers,
       diagrams-lib, diagrams-core, diagrams-contrib, diagrams-svg,
-      lens
+      lens, raw-strings-qq
   default-language:    Haskell2010
 
 executable gen
