@@ -1,8 +1,0 @@
-graph environment {
-	m1 [label="m1"];
-	m2 [label="m2"];
-	m3 [label="m3"];
-	m1 -- m2;
-	m1 -- m3;
-	m2 -- m3;
-}
