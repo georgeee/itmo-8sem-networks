@@ -14,8 +14,8 @@ import Control.Arrow
 import Text.Printf
 
 data Node = Node 
-    { nodeType :: String
-    , nodeId   :: I.Int8 
+    { nodeType       :: String
+    , nodeId         :: I.Int8 
     } deriving (Eq)
 
 data Bridge  =  Bridge 
@@ -25,17 +25,18 @@ data Bridge  =  Bridge
     } deriving (Show) 
 
 data Env  =  Env 
-    { envNodes :: [Node]
-    , envBridges :: [Bridge]
-    , envServers :: [Node]
-    , envClients :: [Node]
+    { envNodes      :: [Node]
+    , envBridges    :: [Bridge]
+    , envServers    :: [Node]
+    , envClients    :: [Node]
+    , envDevStartNo :: Int
     } deriving (Show)
 
 type InetEnabled  =  Bool
 
 
 instance Show Node where
-    show (Node t id)  =  t ++ show id
+    show   =  (++) <$> nodeType <*> show . nodeId
 
 instance PrintfArg Node where
     formatArg n format  =  (++) $ case fmtChar format of
@@ -48,30 +49,37 @@ envEdges :: Env -> [(Node, Node)]
 envEdges  =  ((sequence . (head &&& drop 1) =<< ) 
                  . L.tails . bridgeNodes =<< ) . envBridges
 
+holdingBridges :: Node -> Env -> [Bridge]
+holdingBridges n  =  filter (elem n . bridgeNodes) . envBridges
+
 readNode :: String -> Node
 readNode s  =  
     let (t, r) = L.span Char.isAlpha s
         (i, r2)  = L.span Char.isDigit r        
     in  if null t || null i || not (null r2)
             then error $ "Illegal node name " ++ s 
-            else Node t (read i)
+            else Node { nodeType = t 
+                      , nodeId = (read i)
+                      }
 
 type NodeName  =  String
 type ServerNodeName  =  String
 type ClientNodeName  =  String
+type DevStartNo  =  Int
 
-extEnv :: [NodeName] -> [ServerNodeName] -> [ClientNodeName] -> [(InetEnabled, [NodeName])] -> Env 
-extEnv nodes servers clients bridges  =  either error id $ checkEnv $ Env 
-    { envNodes   = readNode <$> nodes
-    , envBridges = zipWith (&) [1..] $ makeBridge <$> bridges
-    , envServers = readNode <$> servers
-    , envClients = readNode <$> clients
+extEnv :: [NodeName] -> DevStartNo -> [ServerNodeName] -> [ClientNodeName] -> [(InetEnabled, [NodeName])] -> Env 
+extEnv nodes devNo servers clients bridges  =  either error id $ checkEnv $ Env 
+    { envNodes      = readNode <$> nodes
+    , envBridges    = zipWith (&) [1..] $ makeBridge <$> bridges
+    , envServers    = readNode <$> servers
+    , envClients    = readNode <$> clients
+    , envDevStartNo = devNo
     }
   where
     makeBridge (ie, nodes) id = Bridge ie id (readNode <$> nodes)
   
-env :: [NodeName] -> [(InetEnabled, [NodeName])] -> Env
-env ns  =  extEnv ns [] []
+env :: [NodeName] -> [[NodeName]] -> Env
+env ns  =  extEnv ns 3 [] [] . map (False, )
 
 checkEnv :: Env -> Either String Env
 checkEnv e@Env{..}  =  e <$ do

@@ -1,25 +1,3 @@
-{-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE RecordWildCards #-}
-
-module LaunchScript where
-
-import Env
-import Text.RawString.QQ
-import Text.Printf
-import qualified Data.Char as C
-import Scripts
-
-newtype LaunchScript  =  LaunchScript Env
-
-instance Show LaunchScript where
-    show (LaunchScript e)  =  genLaunch e  
-
-instance Script LaunchScript where
-    defName _  =  "launch.sh"
-
----------------------- script start ---------------------
-genLaunch :: Env -> String
-genLaunch e  =  [r|  
 #!/bin/bash
 
 ### Launch.sh
@@ -38,8 +16,10 @@ source $APP_DIR/../launch-base.sh
 ## Here you can customize arguments for your setup
 ## Note that basic options like -m and -b would be parsed in launch-base.sh, so you don't have to worry about them
 
+subnets=4
 launch_slave=true
 launch_master=true
+ei=false #enable_internet
 no_quagga=false
 
 while test $# -gt 0
@@ -99,8 +79,23 @@ function get_args() {
   local type=$1
   local id=$2
   local i=$3
-  local name=$type$id
-|] ++ generate_devs ++ [r|  
+  if [[ $id -eq 1 ]]; then
+    local p=$subnets$id
+  else
+    local p=$((id-1))$id
+  fi
+  local n=$id$((id%$subnets+1))
+
+  echo "$i ($type$id) p=$p n=$n" >&2
+
+  generate_dev $i $id $ei
+  if [[ $type == 'm' ]]; then
+     generate_dev $i $p
+     generate_dev $i $n
+     generate_dev $i $id $ei
+  else
+     generate_dev $i $id $ei
+  fi
 }
 
 ### Main section
@@ -112,19 +107,15 @@ function get_args() {
 
 # launch <type> <id> <machine_id>
 
-|] ++ launches ++ [r|
+id=1
+i=1
+while [[ $id -le $subnets ]]; do 
+  if $launch_master; then
+    launch m $id $((2*i-1)) &
+  fi
+  if $launch_slave; then
+    launch s $id $((2*i)) &
+  fi
+  i=$((i+1))
+  id=$((id+1))
 done
-|] 
--------------------------- script end -------------------------
-
-  where
-    generate_devs :: String
-    generate_devs = flip nodeCase (envNodes e) $ \node -> do
-        Bridge{..} <- holdingBridges node e
-        printf "   generate_dev %i %d %s\n" node bridgeId (C.toLower <$> show bridgeInetEnabled) :: String
-            
-    launches :: String
-    launches = 
-        let launch n = printf "launch %t %i %i &\n" n n n  
-        in  envNodes e >>= launch
-           

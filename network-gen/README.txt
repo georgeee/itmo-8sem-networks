@@ -1,6 +1,6 @@
 Example
 > stack ghci
->> let e = env ["m1", "m2", "s1"] [(False, ["m1", "m2"]), (False, ["m1", "s1"])]
+>> let e = env ["m1", "m2", "s1"] [["m1", "m2"], ["m1", "s1"]]
 >> save $ LaunchScript e
 or 
 >> saveTo dir $ LaunchScript e
@@ -10,4 +10,4 @@ To generate to specified file
 
 For generating all scripts with single shot, see "generate" and "generateTo" in Gen module
 
-To specify server and client nodes, see "extEnv"
+See also function "extEnv"

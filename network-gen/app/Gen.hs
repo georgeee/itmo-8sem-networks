@@ -5,7 +5,7 @@ import Control.Monad
 import Draw
 import Env
 import LaunchScript
-import InitScript
+import IfupScript
 import Scripts
 
 main :: IO ()
@@ -16,6 +16,9 @@ generate :: Env -> IO ()
 generate  =  generateTo "./"
 
 generateTo :: Directory -> Env -> IO ()
-generateTo dir e  =  mapM_ (save dir . ( $ e)) [LaunchScript] 
+generateTo dir e  =  let store f = saveTo dir $ f e
+                     in  store LaunchScript
+                      >> store IfupScript 
+                    
         
 
