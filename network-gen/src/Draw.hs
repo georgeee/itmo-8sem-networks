@@ -2,12 +2,9 @@ module Draw where
 
 import Graphviz
 import Env
-import qualified Data.List as L
 import Text.Printf
 import Control.Monad
-import qualified Data.Map as Map
 import Control.Lens
-import Control.Arrow
 
 instance Graphviz Env where
     buildGraph e  =  "graph environment {\n" ++ entries  ++ "}\n"     

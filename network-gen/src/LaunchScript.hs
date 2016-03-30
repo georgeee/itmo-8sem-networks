@@ -1,4 +1,5 @@
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module LaunchScript where
 
@@ -14,7 +15,7 @@ instance Show LaunchScript where
     show (LaunchScript e)  =  genLaunch e  
 
 instance Script LaunchScript where
-    defName  =  const "launch.sh"
+    defName _  =  "launch.sh"
 
 genLaunch :: Env -> String
 genLaunch e  =  [r|  
@@ -117,15 +118,15 @@ done
 
   where
     generate_devs :: String
-    generate_devs = 
-        let bridges = envBridges e
-            print_dev n (Bridge ie bid _) = printf "   generate_dev '%i' '%d' %s\n" n bid (C.toLower <$> show ie) :: String
-            devs n  = (filter (elem n . bridgeNodes) bridges) >>= print_dev n :: String
-            node_dev n = printf "if [[ $name == '%s' ]]; then\n%sfi\n" n (devs n)
-        in  envNodes e >>= node_dev
-
+    generate_devs = do
+        node <- envNodes e
+        printf "if [[ $name == '%s' ]]; then\n%sfi\n" node $ do   -- for each generate_dev
+            holdingBridge <- filter (elem node . bridgeNodes) $ envBridges e
+            let Bridge{..} = holdingBridge
+            printf "   generate_dev %i %d %s\n" node bridgeId (C.toLower <$> show bridgeInetEnabled) :: String
+            
     launches :: String
     launches = 
-        let launch n = printf "launch %t %i %s &\n" n n n  
+        let launch n = printf "launch %t %i %i &\n" n n n  
         in  envNodes e >>= launch
            

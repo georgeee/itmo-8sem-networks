@@ -1,4 +1,5 @@
 {-# LANGUAGE TupleSections #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Env where
 
@@ -18,17 +19,20 @@ data Node = Node
     } deriving (Eq)
 
 data Bridge  =  Bridge 
-    { inetEnabled :: InetEnabled
+    { bridgeInetEnabled :: InetEnabled
     , bridgeId    :: Int
     , bridgeNodes :: [Node]
     } deriving (Show) 
 
-type InetEnabled  =  Bool
-
 data Env  =  Env 
     { envNodes :: [Node]
     , envBridges :: [Bridge]
+    , envServers :: [Node]
+    , envClients :: [Node]
     } deriving (Show)
+
+type InetEnabled  =  Bool
+
 
 instance Show Node where
     show (Node t id)  =  t ++ show id
@@ -39,11 +43,6 @@ instance PrintfArg Node where
         'i' -> show $ nodeId n
         't' -> nodeType n 
         bad -> error $ "Bad format letter '" ++ bad : "' for data Node"
-
-type NodeName  =  String
-
-envBridgesList :: Env -> [Bridge]
-envBridgesList  =  envBridges
 
 envEdges :: Env -> [(Node, Node)]    
 envEdges  =  ((sequence . (head &&& drop 1) =<< ) 
@@ -57,18 +56,36 @@ readNode s  =
             then error $ "Illegal node name " ++ s 
             else Node t (read i)
 
-env :: [NodeName] -> [(InetEnabled, [NodeName])] -> Env 
-env nodes bridges  =  either error id $ checkEnv $ Env 
+type NodeName  =  String
+type ServerNodeName  =  String
+type ClientNodeName  =  String
+
+extEnv :: [NodeName] -> [ServerNodeName] -> [ClientNodeName] -> [(InetEnabled, [NodeName])] -> Env 
+extEnv nodes servers clients bridges  =  either error id $ checkEnv $ Env 
     { envNodes   = readNode <$> nodes
     , envBridges = zipWith (&) [1..] $ makeBridge <$> bridges
+    , envServers = readNode <$> servers
+    , envClients = readNode <$> clients
     }
   where
     makeBridge (ie, nodes) id = Bridge ie id (readNode <$> nodes)
   
+env :: [NodeName] -> [(InetEnabled, [NodeName])] -> Env
+env ns  =  extEnv ns [] []
+
 checkEnv :: Env -> Either String Env
-checkEnv e@(Env nodes bridges)  =  fmap (const e) $ sequence $ do
-    bridge <- bridges
-    subnode <- bridgeNodes bridge
-    pure $ if subnode `elem` nodes
-        then Right ()
-        else Left $ "Node " ++ show subnode ++ " is not within node list"
+checkEnv e@Env{..}  =  e <$ do
+    traverse checkNodeDefined usedNodes
+    checkDups
+  where
+    usedNodes = (envBridges >>= bridgeNodes)
+             ++ envServers
+             ++ envClients
+    checkNodeDefined n = if n `elem` envNodes
+                    then Right ()
+                    else Left $ "Node " ++ show n ++ " is not within node list"
+    checkDups = let nodeNames = L.sort (show <$> envNodes)
+                    checkNeib (n1, n2) = if n1 /= n2 then Right () else Left $ "duplicate node: " ++ n1
+                in  traverse checkNeib $ zip nodeNames (tail nodeNames)
+            
+
