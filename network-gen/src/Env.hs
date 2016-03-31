@@ -89,11 +89,11 @@ checkEnv e@Env{..}  =  e <$ do
     usedNodes = (envBridges >>= bridgeNodes)
              ++ envServers
              ++ envClients
-    checkNodeDefined n = if n `elem` envNodes
-                    then Right ()
-                    else Left $ "Node " ++ show n ++ " is not within node list"
+    
+    checkNodeDefined n = unless (n `elem` envNodes) $ Left $ printf "Node %s is not within node list" n
+    
     checkDups = let nodeNames = L.sort (show <$> envNodes)
-                    checkNeib (n1, n2) = if n1 /= n2 then Right () else Left $ "duplicate node: " ++ n1
+                    checkNeib (n1, n2) = when (n1 == n2) $ Left ("duplicate node: " ++ n1)
                 in  traverse checkNeib $ zip nodeNames (tail nodeNames)
             
 
