@@ -20,10 +20,10 @@ function launch() {
   local id=$2
   local i=$3
   echo "Launch $type $id"
-  rm -Rf $runConfigs/$type$id
-  mkdir -p $runConfigs/$type$id
-  create_config $type $id $runConfigs/$type$id
-  get_args $type $id $i | launch_qemu $type $id
+  rm -Rf $runConfigs/$type$id-$i
+  mkdir -p $runConfigs/$type$id-$i
+  create_config $type $id $runConfigs/$type$id-$i $i
+  get_args $type $id $i | launch_qemu $type $id $i
 }
 
 function generate_script {
@@ -47,9 +47,10 @@ function generate_script {
 function launch_qemu {
   local type=$1
   local id=$2
+  local i=$3
 
   xargs \
-    sudo qemu-system-i386 -enable-kvm -m $mem -hda "$base_img" -snapshot -hdb fat:$runConfigs/$type$id -boot d
+    sudo qemu-system-i386 -enable-kvm -m $mem -hda "$base_img" -snapshot -hdb fat:$runConfigs/$type$id-$i -boot d
 }
 
 function netscript_generate {
@@ -68,7 +69,7 @@ function generate_dev {
   local i=$1
   local id=$2 #bridge id
   local inet=$3 #true/false, enable inet (MASQUERADE)
-  local mac=02-00-00-00-`printf "%02x" $i`-`printf "%02x" $mac_counter`
+  local mac=02-00-00-`printf "%02x" $id`-`printf "%02x" $i`-`printf "%02x" $mac_counter`
   echo -netdev tap,id=nic.$mac_counter,`generate_script $id $inet`
   echo -device e1000,netdev=nic.$mac_counter,mac=$mac
   mac_counter=$((mac_counter+1))
