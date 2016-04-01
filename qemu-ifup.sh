@@ -46,7 +46,7 @@ do_dnsmasq() {
 }
 
 check_bridge() {
-    if do_brctl show | grep "^$1" > /dev/null 2> /dev/null; then
+    if do_brctl show | grep -E "^$1\\s" > /dev/null 2> /dev/null; then
       return 1
     else
       return 0
@@ -58,7 +58,7 @@ create_bridge() {
     echo "waitning br $1 up"
     while check_bridge "$1"; do
       sleep 0.5
-      echo " repeating... (waitning $1)"
+      echo " repeating... (waiting $1)"
     done
     do_brctl show | grep "^$1"
     do_brctl stp "$1" off
