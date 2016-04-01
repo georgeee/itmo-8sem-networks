@@ -15,7 +15,7 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     
-    Env, EnvGraph, LaunchScript, IfupScript, Output
+    Env, EnvGraph, LaunchScript, IfupScript, Output, Gen
   build-depends:       
       base >= 4.7 && < 5,
       mtl, containers,
@@ -25,7 +25,7 @@ library
 
 executable gen
   hs-source-dirs:      app
-  main-is:             Gen.hs
+  main-is:             Main.hs
   default-language:    Haskell2010
   build-depends:       base >= 4.7 && < 5,
                        network-gen
