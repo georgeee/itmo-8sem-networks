@@ -22,7 +22,7 @@ instance Output IfupScript where
 ---------------- script start -----------------
 genIfup :: Env -> String
 genIfup e  =  [r|#!/bin/bash
-name = $type$id
+name=$type$id
 
 ifaces=()
 bridges=()
