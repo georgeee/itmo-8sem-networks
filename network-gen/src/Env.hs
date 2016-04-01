@@ -68,27 +68,32 @@ type ServerNodeName  =  String
 type ClientNodeName  =  String
 type DevStartNo  =  Int
 
-extEnv :: [NodeName] -> DevStartNo -> [ServerNodeName] -> [ClientNodeName] -> [(InetEnabled, BridgeId, [NodeName])] -> Env
-extEnv nodes devNo servers clients bridges  =  either error id $ checkEnv $ Env
+env0 :: [NodeName] -> DevStartNo -> [ServerNodeName] -> [ClientNodeName] -> [Bridge] -> Env
+env0 nodes devNo servers clients bridges  =  either error id $ checkEnv $ Env
     { envNodes      = readNode   <$> nodes
-    , envBridges    = makeBridge <$> bridges
+    , envBridges    = bridges
     , envServers    = readNode   <$> servers
     , envClients    = readNode   <$> clients
     , envDevStartNo = devNo
     }
-  where
-    makeBridge (ie, bid, nodes) = Bridge ie bid (readNode <$> nodes)
 
-env :: [NodeName] -> [(BridgeId, [NodeName])] -> Env
-env ns  =  extEnv ns 4 [] [] . map (\(bid, nss) -> (True, bid, nss))
+env1 :: [NodeName] -> [ServerNodeName] -> [ClientNodeName] -> [Bridge] -> Env
+env1 ns  =  env0 ns 4
 
-autoEnv :: [NodeName] -> [[NodeName]] -> Env
-autoEnv ns  =  env ns . zip [1..]
+env :: [NodeName] -> [Bridge] -> Env
+env ns  =  env1 ns [] [] 
+
+br1 :: BridgeId -> InetEnabled -> [NodeName] -> Bridge
+br1 id ie ns  =  Bridge ie id $ map readNode ns
+
+br :: BridgeId -> [NodeName] -> Bridge 
+br id ns  =  Bridge True id $ map readNode ns
 
 checkEnv :: Env -> Either String Env
 checkEnv e@Env{..}  =  e <$ do
     traverse checkNodeDefined usedNodes
-    checkDups
+    maybe (Right ()) (Left . printf "Duplicate node: %s") $ findDups envNodes
+    maybe (Right ()) (Left . printf "Duplicate bridge id: %d") $ findDups $ bridgeId <$> envBridges
   where
     usedNodes = (envBridges >>= bridgeNodes)
              ++ envServers
@@ -96,8 +101,11 @@ checkEnv e@Env{..}  =  e <$ do
 
     checkNodeDefined n = unless (n `elem` envNodes) $ Left $ printf "Node %s is not within node list" n
 
-    checkDups = let ns = L.sort envNodes
-                    checkNeib (n1, n2) = when (n1 == n2) $ Left ("duplicate node: " ++ show n1)
-                in  unless (null ns) $ void $ traverse checkNeib $ zip ns (tail ns)
 
+findDups :: Ord a => [a] -> Maybe a
+findDups l = let ns = L.sort l
+                 checkNeib (n1, n2) = when (n1 == n2) $ Left n1
+             in  either Just (const Nothing) $ unless (null ns) 
+               $ void $ traverse checkNeib $ zip ns (tail ns)
 
+    
