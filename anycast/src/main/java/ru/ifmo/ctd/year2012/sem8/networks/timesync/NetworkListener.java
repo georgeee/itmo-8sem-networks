@@ -1,4 +1,4 @@
-package ru.huyak.huyak.i.v.production;
+package ru.ifmo.ctd.year2012.sem8.networks.timesync;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
