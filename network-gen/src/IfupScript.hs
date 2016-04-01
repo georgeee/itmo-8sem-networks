@@ -6,7 +6,7 @@ module IfupScript where
 import Env
 import Text.RawString.QQ
 import Text.Printf
-import Scripts
+import Output
 import qualified Data.List as L
 import Data.Maybe
 
@@ -15,7 +15,7 @@ newtype IfupScript  =  IfupScript Env
 instance Show IfupScript where
     show (IfupScript e)  =  genIfup e  
 
-instance Script IfupScript where
+instance Output IfupScript where
     defName _  =  "ifup.sh"
 
 

@@ -1,9 +1,9 @@
-module Scripts where
+module Output where
 
 import Text.Printf
 import Env
 
-class Show s => Script s where
+class Show s => Output s where
     defName :: s -> String
     
     saveTo :: Directory -> s -> IO ()

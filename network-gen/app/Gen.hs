@@ -2,11 +2,11 @@ module Gen where
 
 import Control.Monad
 
-import Draw
 import Env
+import EnvGraph
 import LaunchScript
 import IfupScript
-import Scripts
+import Output
 
 main :: IO ()
 main  =  putStrLn "Lol"
@@ -16,9 +16,10 @@ generate :: Env -> IO ()
 generate  =  generateTo "./"
 
 generateTo :: Directory -> Env -> IO ()
-generateTo dir e  =  let store f = saveTo dir $ f e
-                     in  store LaunchScript
-                      >> store IfupScript 
+generateTo dir e  =  let storeAs f = saveTo dir $ f e
+                     in  storeAs LaunchScript
+                     >>  storeAs IfupScript 
+                     >>  storeAs EnvGraph
                     
         
 

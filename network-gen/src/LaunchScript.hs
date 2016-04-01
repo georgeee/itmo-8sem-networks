@@ -7,14 +7,14 @@ import Env
 import Text.RawString.QQ
 import Text.Printf
 import qualified Data.Char as C
-import Scripts
+import Output
 
 newtype LaunchScript  =  LaunchScript Env
 
 instance Show LaunchScript where
     show (LaunchScript e)  =  genLaunch e  
 
-instance Script LaunchScript where
+instance Output LaunchScript where
     defName _  =  "launch.sh"
 
 ---------------------- script start ---------------------

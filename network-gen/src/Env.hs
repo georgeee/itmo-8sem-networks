@@ -16,11 +16,11 @@ import Text.Printf
 data Node = Node 
     { nodeType       :: String
     , nodeId         :: I.Int8 
-    } deriving (Eq)
+    } deriving (Eq, Ord)
 
 data Bridge  =  Bridge 
     { bridgeInetEnabled :: InetEnabled
-    , bridgeId    :: Int
+    , bridgeId    :: BridgeId
     , bridgeNodes :: [Node]
     } deriving (Show) 
 
@@ -33,10 +33,11 @@ data Env  =  Env
     } deriving (Show)
 
 type InetEnabled  =  Bool
+type BridgeId  =  Int
 
 
 instance Show Node where
-    show   =  (++) <$> nodeType <*> show . nodeId
+    show  =  (++) <$> nodeType <*> show . nodeId
 
 instance PrintfArg Node where
     formatArg n format  =  (++) $ case fmtChar format of
@@ -45,9 +46,9 @@ instance PrintfArg Node where
         't' -> nodeType n 
         bad -> error $ "Bad format letter '" ++ bad : "' for data Node"
 
-envEdges :: Env -> [(Node, Node)]    
-envEdges  =  ((sequence . (head &&& drop 1) =<< ) 
-                 . L.tails . bridgeNodes =<< ) . envBridges
+envEdges :: Env -> [(BridgeId, (Node, Node))]    
+envEdges  =  (sequence . (bridgeId &&& (sequence . (head &&& drop 1) =<< ) 
+                 . L.tails . bridgeNodes) =<< ) . envBridges
 
 holdingBridges :: Node -> Env -> [Bridge]
 holdingBridges n  =  filter (elem n . bridgeNodes) . envBridges
@@ -92,8 +93,8 @@ checkEnv e@Env{..}  =  e <$ do
     
     checkNodeDefined n = unless (n `elem` envNodes) $ Left $ printf "Node %s is not within node list" n
     
-    checkDups = let nodeNames = L.sort (show <$> envNodes)
-                    checkNeib (n1, n2) = when (n1 == n2) $ Left ("duplicate node: " ++ n1)
-                in  traverse checkNeib $ zip nodeNames (tail nodeNames)
+    checkDups = let ns = L.sort envNodes
+                    checkNeib (n1, n2) = when (n1 == n2) $ Left ("duplicate node: " ++ show n1)
+                in  unless (null ns) $ void $ traverse checkNeib $ zip ns (tail ns)
             
 
