@@ -26,6 +26,8 @@ function ensure_dev_up {
   echo "Dev $1 is ready to up"
 }
 
+source "./ifaces.sh"
+
 ##########################################
 ## Task-specific part
 ##########################################
@@ -40,20 +42,6 @@ else
   p=$((id-1))$id
 fi
 n=$id$((id%$subnets+1))
-
-ifaces=()
-bridges=()
-indexes=()
-
-if [[ "$type" == 'm' ]]; then
-  ifaces=(ens4 ens5 ens6)
-  bridges=($p $n $id)
-  indexes=(2 1 1)
-else
-  ifaces=(ens4)
-  bridges=($id)
-  indexes=(2)
-fi
 
 function get_iface {
   local i=$1

@@ -61,63 +61,9 @@ function create_config() {
     | sed "s/%subnets%/$subnets/g" \
     | sed "s/%no_quagga%/$no_quagga/g" \
     > "$dir/init.sh"
+  cp "ifaces.sh" "$dir"
   chmod +x "$dir/init.sh"
+  chmod +x "$dir/ifaces.sh"
 }
 
-### QEMU additional arguments generator
-## Here you can generate additional arguments for QEMU, simply echoing them to stdout
-## Use generate_dev subroutine to setup necessary devices
-
-# get_args <type> <id> <machine_id>
-
-# generate_dev <machine_id> <id> <enable_inet>
-#
-# if enable_inet=true, internet would be appropriately set up
-#   otherwise (enable_inet=false) internet would be off for VM
-# id is an id of bridge, should be in range [1..254]
-# if two devices are connected to same bridge, they will share one network
-
-function get_args() {
-  local type=$1
-  local id=$2
-  local i=$3
-  if [[ $id -eq 1 ]]; then
-    local p=$subnets$id
-  else
-    local p=$((id-1))$id
-  fi
-  local n=$id$((id%$subnets+1))
-
-  echo "$i ($type$id) p=$p n=$n" >&2
-
-  generate_dev $i $id $ei
-  if [[ $type == 'm' ]]; then
-     generate_dev $i $p
-     generate_dev $i $n
-     generate_dev $i $id $ei
-  else
-     generate_dev $i $id $ei
-  fi
-}
-
-### Main section
-## This section launches all VMs
-
-## Use launch subroutine to launch VMs
-## Please note, that machine_id values should be unique
-## As well as pairs {type, id}
-
-# launch <type> <id> <machine_id>
-
-id=1
-i=1
-while [[ $id -le $subnets ]]; do 
-  if $launch_master; then
-    launch m $id $((2*i-1)) &
-  fi
-  if $launch_slave; then
-    launch s $id $((2*i)) &
-  fi
-  i=$((i+1))
-  id=$((id+1))
-done
+source $APP_DIR/launch-impl.sh

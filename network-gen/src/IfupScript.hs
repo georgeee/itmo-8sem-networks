@@ -13,20 +13,22 @@ import Data.Maybe
 newtype IfupScript  =  IfupScript Env
 
 instance Show IfupScript where
-    show (IfupScript e)  =  genIfup e  
+    show (IfupScript e)  =  genIfup e
 
 instance Output IfupScript where
-    defName _  =  "ifup.sh"
+    defName _  =  "ifaces.sh"
 
 
 ---------------- script start -----------------
 genIfup :: Env -> String
 genIfup e  =  [r|#!/bin/bash
-type = %type%
-id = %id%
 name = $type$id
 
-|] ++ devs  
+ifaces=()
+bridges=()
+indexes=()
+
+|] ++ devs
 ----------------- script end ------------------
 
   where
@@ -34,7 +36,7 @@ name = $type$id
     devs = flip nodeCase (envNodes e) $ \node -> do
         (Bridge{..}, devNo) <- zip (holdingBridges node e) [envDevStartNo e ..]
         let devName = "ens" ++ show devNo
-            nodeIdInBridge = (+1) $ fromJust $ L.findIndex ( == node) bridgeNodes 
-        printf "    ensure_dev_up %s\n    ifconfig %s 192.168.%d.%d\n"  
-            devName devName bridgeId nodeIdInBridge
-           
+            nodeIdInBridge = (+1) $ fromJust $ L.findIndex ( == node) bridgeNodes
+        printf "    ifaces+=(%s)\n    bridges+=(%d)\n    indexes+=(%d)\n"
+            devName bridgeId nodeIdInBridge
+

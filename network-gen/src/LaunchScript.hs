@@ -12,75 +12,14 @@ import Output
 newtype LaunchScript  =  LaunchScript Env
 
 instance Show LaunchScript where
-    show (LaunchScript e)  =  genLaunch e  
+    show (LaunchScript e)  =  genLaunch e
 
 instance Output LaunchScript where
-    defName _  =  "launch.sh"
+    defName _  =  "launch-impl.sh"
 
 ---------------------- script start ---------------------
 genLaunch :: Env -> String
-genLaunch e  =  [r|  
-#!/bin/bash
-
-### Launch.sh
-### Launches virtual machine cluster on several qemu instances
-
-### This script is to be adapted for concrete application
-### Basic idea: each machine in cluster has type and id (subnetwork id)
-
-
-APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-source $APP_DIR/../launch-base.sh
-
-### Arguments
-
-## Here you can customize arguments for your setup
-## Note that basic options like -m and -b would be parsed in launch-base.sh, so you don't have to worry about them
-
-launch_slave=true
-launch_master=true
-no_quagga=false
-
-while test $# -gt 0
-do
-  case "$1" in
-    -no-m) launch_master=false
-        ;;
-    -no-s) launch_slave=false
-        ;;
-    -ei) ei=true
-        ;;
-    -nq) no_quagga=true
-        ;;
-    -s) subnets=$2
-        shift
-        ;;
-    *) break
-        ;;
-  esac
-  shift
-done
-
-### VM config generator
-## In this function you need to generate files for VM's environment
-## On VM start init.sh will be launched (if exists)
-
-# create_config <type> <id> <dir>
-
-function create_config() {
-  local type=$1
-  local id=$2
-  local dir=$3
-  cat "$APP_DIR/init-stub.sh" \
-    | sed "s/%enable_inet%/$ei/g" \
-    | sed "s/%id%/$id/g" \
-    | sed "s/%type%/$type/g" \
-    | sed "s/%subnets%/$subnets/g" \
-    | sed "s/%no_quagga%/$no_quagga/g" \
-    > "$dir/init.sh"
-  chmod +x "$dir/init.sh"
-}
+genLaunch e  =  [r|#!/bin/bash
 
 ### QEMU additional arguments generator
 ## Here you can generate additional arguments for QEMU, simply echoing them to stdout
@@ -100,7 +39,7 @@ function get_args() {
   local id=$2
   local i=$3
   local name=$type$id
-|] ++ generate_devs ++ [r|  
+|] ++ generate_devs ++ [r|
 }
 
 ### Main section
@@ -112,9 +51,7 @@ function get_args() {
 
 # launch <type> <id> <machine_id>
 
-|] ++ launches ++ [r|
-done
-|] 
+|] ++ launches
 -------------------------- script end -------------------------
 
   where
@@ -122,9 +59,9 @@ done
     generate_devs = flip nodeCase (envNodes e) $ \node -> do
         Bridge{..} <- holdingBridges node e
         printf "   generate_dev %i %d %s\n" node bridgeId (C.toLower <$> show bridgeInetEnabled) :: String
-            
+
     launches :: String
-    launches = 
-        let launch n = printf "launch %t %i %i &\n" n n n  
+    launches =
+        let launch n = printf "launch %t %i %i &\n" n n n
         in  envNodes e >>= launch
-           
+
