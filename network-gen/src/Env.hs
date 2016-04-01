@@ -68,19 +68,22 @@ type ServerNodeName  =  String
 type ClientNodeName  =  String
 type DevStartNo  =  Int
 
-extEnv :: [NodeName] -> DevStartNo -> [ServerNodeName] -> [ClientNodeName] -> [(InetEnabled, [NodeName])] -> Env
+extEnv :: [NodeName] -> DevStartNo -> [ServerNodeName] -> [ClientNodeName] -> [(InetEnabled, BridgeId, [NodeName])] -> Env
 extEnv nodes devNo servers clients bridges  =  either error id $ checkEnv $ Env
-    { envNodes      = readNode <$> nodes
-    , envBridges    = zipWith (&) [1..] $ makeBridge <$> bridges
-    , envServers    = readNode <$> servers
-    , envClients    = readNode <$> clients
+    { envNodes      = readNode   <$> nodes
+    , envBridges    = makeBridge <$> bridges
+    , envServers    = readNode   <$> servers
+    , envClients    = readNode   <$> clients
     , envDevStartNo = devNo
     }
   where
-    makeBridge (ie, nodes) id = Bridge ie id (readNode <$> nodes)
+    makeBridge (ie, bid, nodes) = Bridge ie bid (readNode <$> nodes)
 
-env :: [NodeName] -> [[NodeName]] -> Env
-env ns  =  extEnv ns 3 [] [] . map (False, )
+env :: [NodeName] -> [(BridgeId, [NodeName])] -> Env
+env ns  =  extEnv ns 4 [] [] . map (\(bid, nss) -> (True, bid, nss))
+
+autoEnv :: [NodeName] -> [[NodeName]] -> Env
+autoEnv ns  =  env ns . zip [1..]
 
 checkEnv :: Env -> Either String Env
 checkEnv e@Env{..}  =  e <$ do
