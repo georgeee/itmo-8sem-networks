@@ -23,7 +23,7 @@ instance Show EnvGraph where
         
         nodeColor n 
             | n `elem` envClients e 
-           && n `elem` envServers e  =  "cyan"
+           && n `elem` envServers e  =  "#00D0D0"  -- dark cyan
             | n `elem` envClients e  =  "green"
             | n `elem` envServers e  =  "blue"
             | otherwise              =  "black"
