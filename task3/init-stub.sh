@@ -136,7 +136,7 @@ if [[ $type == 'm' ]]; then
   fi
 else
   route add -net 192.168.0.0/16 gw 192.168.$id.1
-  route -A inet6 add fc00:192:168::/48 gw fc00:192:168:$id::1 dev ens4
+  route -A inet6 add fc00:192:168::/48 gw fc00:192:168:$id::1
 fi
 
 ifconfig
