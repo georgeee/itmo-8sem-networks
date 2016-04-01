@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info" strict="true">
+    <Properties>
+        <Property name="logFormat">%d{dd-MM-yyyy HH:mm:ss.SSS} %level [%t] %.30logger %msgMasked%n%ex</Property>
+    </Properties>
+
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+
+    <Appenders>
+        <Appender type="Console" name="Console">
+            <PatternLayout pattern="${logFormat}"/>
+        </Appender>
+    </Appenders>
+
+</Configuration>

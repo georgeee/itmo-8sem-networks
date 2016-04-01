@@ -1,14 +1,23 @@
 package ru.ifmo.ctd.year2012.sem8.networks.timesync;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.nio.ByteBuffer;
 
 public class NetworkListener extends Thread {
+    private static final Logger log = LoggerFactory.getLogger(ConsoleListener.class);
+    private final int port;
+
+    public NetworkListener(int port) {
+        this.port = port;
+    }
+
     @Override
     public void run() {
-        int port = 6969;
         try (DatagramSocket socket = new DatagramSocket(port)) {
             while (true) {
                 byte[] inData = new byte[69];
@@ -25,7 +34,7 @@ public class NetworkListener extends Thread {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Console listener exception", e);
         }
     }
 }
