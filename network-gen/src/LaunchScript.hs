@@ -56,13 +56,13 @@ function get_args() {
 
   where
     generate_devs :: String
-    generate_devs = 
+    generate_devs =
         let cases = flip nodeCase (envNodes e) $ \node -> do
                 Bridge{..} <- holdingBridges node e
                 printf "   generate_dev %i %d %s\n" node bridgeId (C.toLower <$> show bridgeInetEnabled) :: String
-        in  printf "  generate_dev $i ($id + 100) true\n"
+        in  printf "  generate_dev $i $((id+100)) true\n"
          ++ cases
-                 
+
     launches :: String
     launches =
         let launch n = printf "launch %t %i %i &\n" n n n

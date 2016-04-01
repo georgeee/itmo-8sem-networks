@@ -19,18 +19,21 @@ public class NetworkListener extends Thread {
     @Override
     public void run() {
         try (DatagramSocket socket = new DatagramSocket(port)) {
+            log.info("Launching server...");
             while (true) {
+                log.info("Receiving packet...");
                 byte[] inData = new byte[69];
                 DatagramPacket inPacket = new DatagramPacket(inData, inData.length);
                 socket.receive(inPacket);
                 String time = new String(inPacket.getData()).trim();
+                log.info("Received packet {}", time);
                 if ("time".equals(time)) {
                     ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
                     buffer.putLong(System.currentTimeMillis());
                     byte[] outData = buffer.array();
                     DatagramPacket outPacket = new DatagramPacket(outData, outData.length, inPacket.getAddress(), inPacket.getPort());
                     socket.send(outPacket);
-                    System.out.println("Packet sent");
+                    log.info("Packet sent");
                 }
             }
         } catch (IOException e) {

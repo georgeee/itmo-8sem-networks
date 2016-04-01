@@ -51,6 +51,7 @@ function create_config() {
     | sed "s/%no_quagga%/$no_quagga/g" \
     > "$dir/init.sh"
   cp "ifaces.sh" "$dir"
+  cp -Rf bundle/* "$dir"
   chmod +x "$dir/init.sh"
   chmod +x "$dir/ifaces.sh"
 }

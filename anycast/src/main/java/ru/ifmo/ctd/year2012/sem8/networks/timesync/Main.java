@@ -14,6 +14,7 @@ public class Main {
     private static final String LAUNCH_SERVER_KEY = "server";
     private final Options options = new Options();
     private final CommandLine line;
+
     public Main(String[] args) throws ParseException {
         options.addOption("a", ADDRESS_KEY, true, "Anycast address");
         options.addOption("p", PORT_KEY, true, "Timesync port");
@@ -68,12 +69,14 @@ public class Main {
             formatter.printHelp("timesync", options);
         } else {
             try {
-                if (options.hasOption(LAUNCH_SERVER_KEY)) {
-                    startNetworkListener();
+                Thread serverThread = null;
+                if (line.hasOption(LAUNCH_SERVER_KEY)) {
+                    serverThread = startNetworkListener();
                 }
-                if (options.hasOption(LAUNCH_CLIENT_KEY)) {
+                if (line.hasOption(LAUNCH_CLIENT_KEY)) {
                     startConsoleListener();
                 }
+                if (serverThread != null) serverThread.join();
             } catch (Exception e) {
                 log.error("Exception occurred during execution", e);
             }

@@ -89,6 +89,8 @@ function zebra_conf {
     echo "  no ipv6 nd suppress-ra"
     echo "  ipv6 address `get_ipv6 $i`/64"
     echo "  ipv6 nd prefix `get_ipv6 $i`/64"
+    echo "  ipv6 address fc00:192:168:215/64"
+    echo "  ipv6 nd prefix fc00:192:168:215/64"
     echo "  ipv6 nd ra-interval 10"
     i=$((i+1))
   done
@@ -113,7 +115,12 @@ function init_ifaces {
 
 init_ifaces
 
-if [[ $type == 'm' ]]; then
+function opt {
+  expr match "$2" ".*$1"
+}
+
+unzip timesync-bundle.zip
+if [[ `opt m "$type"` != 0 ]]; then
   sysctl net.ipv4.ip_forward=1
   sysctl net.ipv6.conf.default.forwarding=1
   sysctl net.ipv6.conf.all.forwarding=1
@@ -126,10 +133,21 @@ if [[ $type == 'm' ]]; then
     ospf6d -d -f /etc/quagga/ospf6d.conf
     zebra -d -f /etc/quagga/zebra.conf
   fi
-else
+fi
+if [[ `opt l "$type"` != 0 ]]; then
   route add -net 192.168.0.0/16 gw 192.168.$id.1
   route -A inet6 add fc00:192:168::/48 gw fc00:192:168:$id::1
 fi
+if [[ `opt s "$type"` != 0 ]]; then
+  ifconfig lo inet6 add fc00:192:168:215::1
+  echo "launching timesync server"
+  java -jar timesync/timesync.jar -s
+fi
+if [[ `opt c "$type"` != 0 ]]; then
+  echo "launching timesync client"
+  java -jar timesync/timesync.jar -c -a fc00:192:168:215::1
+fi
+
 
 ifconfig
 route -n
