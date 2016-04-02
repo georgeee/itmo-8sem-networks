@@ -8,7 +8,7 @@ module EnvLens
     , bridges
     , servers
     , clients
-    , devNo
+    , startDevNo
     , bid      
     , ie 
     , ($>)
@@ -26,11 +26,11 @@ import Data.Int
 import Control.Monad.State
                                      
 makeLensesFor 
-    [ ("envNodes"      , "_envNodes")
+    [ ("envNodes"      , "_envNodes" )
     , ("envServers"    , "_servers"  )
     , ("envClients"    , "_clients"  )
-    , ("envBridges"    , "bridges"  )
-    , ("envDevStartNo" , "devNo"    )
+    , ("envBridges"    , "bridges"   )
+    , ("envDevStartNo" , "startDevNo")
     ] ''Env                              
 
 makeLensesFor
