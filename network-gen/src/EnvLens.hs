@@ -1,6 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FunctionalDependencies #-}
 
 module EnvLens 
     ( nodes
@@ -9,14 +10,15 @@ module EnvLens
     , servers
     , clients
     , startDevNo
-    , bid      
+    , iid      
+    , bid
     , ie 
     , ($>)            
     , (<:=)
     , (<++=)
     , newEnv
     , newBridge
-    , renumBridges
+    , renum
     ) 
 where
 
@@ -61,6 +63,12 @@ instance WithNodes Env where
 instance WithNodes Bridge where
     nodes  =  _bridgeNodes . mapping (from asNode)
 
+class Integral i => WithId o i | o -> i where
+    iid :: Lens' o i
+
+instance WithId Bridge BridgeId where
+    iid  =  bid
+
 newEnv :: State Env () -> Env      
 newEnv  =  either error id . checkEnv . flip execState Env 
     { envNodes = []
@@ -90,8 +98,8 @@ ofType t  =  lens get set
     get = map nodeId . filter (( == t) . nodeType)
     set s b = (filter (( /= t) . nodeType) s) ++ (Node t <$> b) 
 
-renumBridges :: State Env ()
-renumBridges  =  modify $ bridges %~ zipWith (set bid) [1..]
+renum :: WithId o i => [o] -> [o]
+renum  =  zipWith (set iid) [1..]
 
 infixr 4 <++=
 (<++=) :: MonadState s m => ASetter s s [a] [a] -> [a] -> m ()

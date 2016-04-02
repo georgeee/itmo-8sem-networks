@@ -34,7 +34,7 @@ cycleNet m  =  newEnv $ do
     for_ (circle m) $ \(n1, n2) -> bridges <:= newBridge $> do
         nodes.ofType "m" .= [n1, n2]
     
-    renumBridges   -- auto bridge ids distribution
+    bridges %= renum  -- auto bridge ids distribution
   where
     circle :: (Enum a, Integral a) => a -> [(a, a)]
     circle k  =  [(x, mod x k + 1) | x <- [1..k]]
