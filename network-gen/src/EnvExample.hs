@@ -3,6 +3,7 @@ import EnvLens
 import Control.Lens
 import Control.Monad
 import Data.Int
+import Data.Foldable (for_)
 
 simpleNet :: Env
 simpleNet  =  newEnv $ do
@@ -26,11 +27,11 @@ cycleNet m  =  newEnv $ do
     nodes.ofType "m" .= [1..m]
     nodes.ofType "s" .= [1..m]
     
-    forM_ [1..m] $ \k -> bridges <:= newBridge $> do
+    for_ [1..m] $ \k -> bridges <:= newBridge $> do
         nodes.ofType "m" .= [k]
         nodes.ofType "s" .= [k]
     
-    forM_ (circle m) $ \(n1, n2) -> bridges <:= newBridge $> do
+    for_ (circle m) $ \(n1, n2) -> bridges <:= newBridge $> do
         nodes.ofType "m" .= [n1, n2]
     
     renumBridges   -- auto bridge ids distribution
