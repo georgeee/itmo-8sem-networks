@@ -11,7 +11,8 @@ module EnvLens
     , startDevNo
     , bid      
     , ie 
-    , ($>)
+    , ($>)            
+    , (<:=)
     , (<++=)
     , newEnv
     , newBridge
@@ -93,8 +94,12 @@ renumBridges :: State Env ()
 renumBridges  =  modify $ bridges %~ zipWith (set bid) [1..]
 
 infixr 4 <++=
-(<++=) :: MonadState s m => ASetter s s [a] [a] -> a -> m ()
-s <++= e  =  s %= ( ++ [e])
+(<++=) :: MonadState s m => ASetter s s [a] [a] -> [a] -> m ()
+s <++= e  =  s %= ( ++ e)
+
+infixr 4 <:=
+(<:=) :: MonadState s m => ASetter s s [a] [a] -> a -> m ()
+s <:= e  =  s <++= [e]
 
 infixr 9 $>
 ($>) :: (a -> b) -> a -> b

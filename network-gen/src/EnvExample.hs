@@ -11,12 +11,12 @@ simpleNet  =  newEnv $ do
     clients    .= ["s1"]
     startDevNo .= 5
 
-    bridges <++= newBridge $> do
+    bridges <:= newBridge $> do
         bid      .= 1
         nodes    .= ["m1", "m2"]
         ie       .= False
 
-    bridges <++= newBridge $> do
+    bridges <:= newBridge $> do
         bid      .= 2
         nodes    .= ["m1", "s1"]
 
@@ -26,11 +26,11 @@ cycleNet m  =  newEnv $ do
     nodes.ofType "m" .= [1..m]
     nodes.ofType "s" .= [1..m]
     
-    forM_ [1..m] $ \k -> bridges <++= newBridge $> do
+    forM_ [1..m] $ \k -> bridges <:= newBridge $> do
         nodes.ofType "m" .= [k]
         nodes.ofType "s" .= [k]
     
-    forM_ (circle m) $ \(n1, n2) -> bridges <++= newBridge $> do
+    forM_ (circle m) $ \(n1, n2) -> bridges <:= newBridge $> do
         nodes.ofType "m" .= [n1, n2]
     
     renumBridges   -- auto bridge ids distribution
@@ -38,6 +38,4 @@ cycleNet m  =  newEnv $ do
     circle :: (Enum a, Integral a) => a -> [(a, a)]
     circle k  =  [(x, mod x k + 1) | x <- [1..k]]
         
-    
-    
     
