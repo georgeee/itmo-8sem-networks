@@ -1,0 +1,43 @@
+import Env
+import EnvLens
+import Control.Lens
+import Control.Monad
+import Data.Int
+
+simpleNet :: Env
+simpleNet  =  newEnv $ do
+    nodes   .= ["m1", "m2", "s1"]
+    servers .= ["m1"]
+    clients .= ["s1"]
+    devNo   .= 5
+
+    bridges <++= newBridge $> do
+        bid      .= 1
+        nodes    .= ["m1", "m2"]
+        ie       .= False
+
+    bridges <++= newBridge $> do
+        bid      .= 2
+        nodes    .= ["m1", "s1"]
+
+
+cycleNet :: Int8 -> Env
+cycleNet m  =  newEnv $ do
+    nodes.ofType "m" .= [1..m]
+    nodes.ofType "s" .= [1..m]
+    
+    forM_ [1..m] $ \k -> bridges <++= newBridge $> do
+        nodes.ofType "m" .= [k]
+        nodes.ofType "s" .= [k]
+    
+    forM_ (circle m) $ \(n1, n2) -> bridges <++= newBridge $> do
+        nodes.ofType "m" .= [n1, n2]
+    
+    renumBridges   -- auto bridge ids distribution
+  where
+    circle :: (Enum a, Integral a) => a -> [(a, a)]
+    circle k  =  [(x, mod x k + 1) | x <- [1..k]]
+        
+    
+    
+    
