@@ -27,12 +27,14 @@ cycleNet m  =  newEnv $ do
     nodes.ofType "m" .= [1..m]
     nodes.ofType "s" .= [1..m]
     
-    for_ [1..m] $ \k -> bridges <:= newBridge $> do
-        nodes.ofType "m" .= [k]
-        nodes.ofType "s" .= [k]
+    for_ [1..m] $ \k -> 
+        bridges <:= newBridge $> do
+            nodes.ofType "m" .= [k]
+            nodes.ofType "s" .= [k]
     
-    for_ (circle m) $ \(n1, n2) -> bridges <:= newBridge $> do
-        nodes.ofType "m" .= [n1, n2]
+    for_ (circle m) $ \(n1, n2) -> 
+        bridges <:= newBridge $> do
+            nodes.ofType "m" .= [n1, n2]
     
     bridges %= renum  -- auto bridge ids distribution
   where
