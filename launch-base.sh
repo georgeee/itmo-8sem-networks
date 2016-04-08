@@ -69,6 +69,7 @@ function generate_dev {
   local i=$1
   local id=$2 #bridge id
   local inet=$3 #true/false, enable inet (MASQUERADE)
+  echo "generate_dev: i=$i id=$id inet=$inet" >&2
   local mac=02-00-00-`printf "%02x" $id`-`printf "%02x" $i`-`printf "%02x" $mac_counter`
   echo -netdev tap,id=nic.$mac_counter,`generate_script $id $inet`
   echo -device e1000,netdev=nic.$mac_counter,mac=$mac

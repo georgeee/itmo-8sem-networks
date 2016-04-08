@@ -55,9 +55,10 @@ holdingBridges n  =  filter (elem n . bridgeNodes) . envBridges
 
 readNode :: String -> Node
 readNode s  =
-    let (t, r) = L.span Char.isAlpha s
-        (i, r2)  = L.span Char.isDigit r
-    in  if null t || null i || not (null r2)
+    let (i', t') = L.span Char.isDigit $ L.reverse s
+        i = L.reverse i'
+        t = L.reverse t'
+    in  if null t || null i
             then error $ "Illegal node name " ++ s
             else Node { nodeType = t
                       , nodeId = (read i)
@@ -81,12 +82,12 @@ env1 :: [NodeName] -> [ServerNodeName] -> [ClientNodeName] -> [Bridge] -> Env
 env1 ns  =  env0 ns 4
 
 env :: [NodeName] -> [Bridge] -> Env
-env ns  =  env1 ns [] [] 
+env ns  =  env1 ns [] []
 
 br1 :: BridgeId -> InetEnabled -> [NodeName] -> Bridge
 br1 id ie ns  =  Bridge ie id $ map readNode ns
 
-br :: BridgeId -> [NodeName] -> Bridge 
+br :: BridgeId -> [NodeName] -> Bridge
 br id ns  =  Bridge True id $ map readNode ns
 
 checkEnv :: Env -> Either String Env
@@ -105,7 +106,7 @@ checkEnv e@Env{..}  =  e <$ do
 findDups :: Ord a => [a] -> Maybe a
 findDups l = let ns = L.sort l
                  checkNeib (n1, n2) = when (n1 == n2) $ Left n1
-             in  either Just (const Nothing) $ unless (null ns) 
+             in  either Just (const Nothing) $ unless (null ns)
                $ void $ traverse checkNeib $ zip ns (tail ns)
 
-    
+

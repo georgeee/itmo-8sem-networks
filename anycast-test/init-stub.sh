@@ -63,6 +63,7 @@ function ospf6d_conf {
   echo "router ospf6"
   echo "  router-id $machine_id.$machine_id.$machine_id.$machine_id"
   local i=0
+  echo "  interface lo area 0.0.0.0"
   while [[ $i -lt ${#ifaces[*]} ]]; do
     echo "  interface `get_iface $i` area 0.0.0.0"
     i=$((i+1))
@@ -75,6 +76,9 @@ function ospf6d_conf {
     echo "  ipv6 ospf6 dead-interval 10"
     i=$((i+1))
   done
+  echo "interface lo"
+  echo "  ipv6 ospf6 hello-interval 5"
+  echo "  ipv6 ospf6 dead-interval 10"
   echo '!'
 }
 
@@ -89,9 +93,14 @@ function zebra_conf {
     echo "  no ipv6 nd suppress-ra"
     echo "  ipv6 address `get_ipv6 $i`/64"
     echo "  ipv6 nd prefix `get_ipv6 $i`/64"
-    echo "  ipv6 address fc00:192:168:215/64"
-    echo "  ipv6 nd prefix fc00:192:168:215/64"
     echo "  ipv6 nd ra-interval 10"
+    if [[ `opt s "$type"` != 0 ]]; then
+      echo "interface lo"
+      echo "  no ipv6 nd suppress-ra"
+      echo "  ipv6 address fc00:192:168:215::1/64"
+      echo "  ipv6 nd prefix fc00:192:168:215::1/64"
+      echo "  ipv6 nd ra-interval 10"
+    fi
     i=$((i+1))
   done
   echo "line vty"
@@ -141,16 +150,24 @@ fi
 if [[ `opt s "$type"` != 0 ]]; then
   ifconfig lo inet6 add fc00:192:168:215::1
   echo "launching timesync server"
-  java -jar timesync/timesync.jar -s
+  java -jar timesync/timesync.jar -s -n "$type$id"
 fi
 if [[ `opt c "$type"` != 0 ]]; then
   echo "launching timesync client"
   java -jar timesync/timesync.jar -c -a fc00:192:168:215::1
 fi
 
+echo -n "opt m: "
+opt m "$type"
+echo -n "opt l: "
+opt l "$type"
+echo -n "opt s: "
+opt s "$type"
+echo -n "opt c: "
+opt c "$type"
 
-ifconfig
-route -n
+echo "Quagga processes:"
+ps -aux |grep quagga | grep -v grep
 
 echo "Machine $type$id launched"
 
