@@ -7,11 +7,16 @@ import EnvGraph
 import LaunchScript
 import IfupScript
 import Output
+import Configs
 
 main :: IO ()
 main  =  putStrLn "Lol"
 
-saveTo' path e = do
-  saveTo path $ LaunchScript e
-  saveTo path $ IfupScript e
-  saveTo path $ EnvGraph e
+generate :: Env -> IO ()
+generate  =  generateTo "./"
+
+generateTo :: Directory -> Env -> IO ()
+generateTo dir e  =  let storeAs f = saveTo dir $ f e
+                     in  storeAs LaunchScript
+                     >>  storeAs IfupScript
+                     >>  storeAs EnvGraph
