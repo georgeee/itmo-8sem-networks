@@ -5,6 +5,10 @@ import Output
 import Text.Printf
 import Control.Monad
 import Control.Lens
+import qualified Data.List as L
+import qualified Data.Map as M
+import Data.Tuple
+import Data.Maybe
 
 newtype EnvGraph  =  EnvGraph Env
 
@@ -30,10 +34,14 @@ instance Show EnvGraph where
             | otherwise              =  "gray"
 
         edgeColor :: BridgeId -> String
-        edgeColor
-            | length (envBridges e) <= 8  =  printf "/accent8/%d"
-            | otherwise                   =  const "black"
+        edgeColor bid
+            | length (envBridges e) <= 8  =  printf "/accent8/%d" $ fromJust $ M.lookup bid bridgeIds
+            | otherwise                   =  "black"
 
+        bridgeIds :: M.Map BridgeId Int
+        bridgeIds  =  let allIds = L.nub $ bridgeId <$> envBridges e
+                      in  M.fromList $ zip allIds [1..] 
+                                         
 instance Output EnvGraph where
     defName _  =  "graph.dot"
 

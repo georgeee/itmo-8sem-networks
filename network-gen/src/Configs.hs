@@ -7,18 +7,33 @@ import EnvGraph
 import LaunchScript
 import IfupScript
 import Output
-
+import Control.Lens
+import EnvLens
+import Data.Int (Int8)
+import Data.Foldable (for_)
 
 circle n = env ((listNames "m" n) ++ (listNames "l" n))
             ((map (\i -> br i ["m" ++ (show i), "l" ++ (show i)]) [1 .. n])
               ++ (map (\i -> br (10 * (i + 1) + ((i + 1) `mod` n + 1)) ["m" ++ (show $ i + 1), "m" ++ (show $ (i + 1) `mod` n + 1)]) [0 .. n - 1]))
 
-listNames :: String -> Int -> [String]
+listNames :: String -> Int8 -> [String]
 listNames s n = map ((s ++) . show) [1 .. n]
 
-fullMesh n = env ((listNames "m" n) ++ (listNames "l" n))
+fullMesh' n = env ((listNames "m" n) ++ (listNames "l" n))
             ((map (\i -> br i ["m" ++ (show i), "l" ++ (show i)]) [1 .. n])
                 ++ ([1 .. n] >>= (\i -> map (\j -> br (10 * i + j) ["m" ++ (show i), "m" ++ (show j)]) (filter (/=i) [1 .. n]))))
+
+fullMesh :: Int8 -> Env
+fullMesh m  =  newEnv $ do
+    nodes.ofType "m" .= [1..m]
+    nodes.ofType "l" .= [1..m]
+    bridges <:= newBridge $> do
+        nodes.ofType "m" .= [1..m]
+        bid .= 0
+    for_ [1..m] $ \i -> 
+        bridges <:= newBridge $> do
+            nodes .= [Node "m" i, Node "l" i]
+            bid .= i
 
 anycastTest1 = env ["mc1", "m2", "m3", "ms4", "m5", "ms6", "m7"]
                    [ br 12 ["mc1", "m2"]

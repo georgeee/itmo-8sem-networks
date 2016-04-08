@@ -33,7 +33,7 @@ data Env  =  Env
     } deriving (Show)
 
 type InetEnabled  =  Bool
-type BridgeId  =  Int
+type BridgeId  =  I.Int8
 
 
 instance Show Node where
