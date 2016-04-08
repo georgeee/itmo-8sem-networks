@@ -1,9 +1,12 @@
-module Gen 
+module Gen
     ( module Env
     , module EnvGraph
     , module LaunchScript
     , module IfupScript
     , module Output
+    , module Configs
+    , generate
+    , generateTo
     )
 where
 
@@ -14,6 +17,7 @@ import EnvGraph
 import LaunchScript
 import IfupScript
 import Output
+import Configs
 
 main :: IO ()
 main  =  putStrLn "Lol"
@@ -25,8 +29,8 @@ generate  =  generateTo "./"
 generateTo :: Directory -> Env -> IO ()
 generateTo dir e  =  let storeAs f = saveTo dir $ f e
                      in  storeAs LaunchScript
-                     >>  storeAs IfupScript 
+                     >>  storeAs IfupScript
                      >>  storeAs EnvGraph
-                    
-        
+
+
 

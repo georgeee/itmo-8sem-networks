@@ -150,7 +150,7 @@ fi
 if [[ `opt s "$type"` != 0 ]]; then
   ifconfig lo inet6 add fc00:192:168:215::1
   echo "launching timesync server"
-  java -jar timesync/timesync.jar -s
+  java -jar timesync/timesync.jar -s -n "$type$id"
 fi
 if [[ `opt c "$type"` != 0 ]]; then
   echo "launching timesync client"

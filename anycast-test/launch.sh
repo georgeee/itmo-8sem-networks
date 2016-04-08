@@ -22,7 +22,7 @@ no_quagga=false
 while test $# -gt 0
 do
   case "$1" in
-    -ei) ei=true
+    -di) ei=false
         ;;
     -nq) no_quagga=true
         ;;

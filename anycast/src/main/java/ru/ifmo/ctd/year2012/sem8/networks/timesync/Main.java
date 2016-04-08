@@ -12,11 +12,13 @@ public class Main {
     private static final String HELP_KEY = "help";
     private static final String LAUNCH_CLIENT_KEY = "client";
     private static final String LAUNCH_SERVER_KEY = "server";
+    private static final String SERVER_NAME_KEY = "name";
     private final Options options = new Options();
     private final CommandLine line;
 
     public Main(String[] args) throws ParseException {
         options.addOption("a", ADDRESS_KEY, true, "Anycast address");
+        options.addOption("n", SERVER_NAME_KEY, true, "Server name");
         options.addOption("p", PORT_KEY, true, "Timesync port");
         options.addOption("h", HELP_KEY, false, "Help message");
         options.addOption("c", LAUNCH_CLIENT_KEY, false, "Launch client");
@@ -31,6 +33,14 @@ public class Main {
         } catch (ParseException e) {
             log.error("Unexpected exception", e);
         }
+    }
+
+    private String getServerName() {
+        String serverName = line.getOptionValue(SERVER_NAME_KEY);
+        if (serverName == null) {
+            throw new IllegalStateException("No server name specified");
+        }
+        return serverName;
     }
 
     private int getPort() {
@@ -53,7 +63,7 @@ public class Main {
     }
 
     public NetworkListener startNetworkListener() {
-        NetworkListener listener = new NetworkListener(getPort());
+        NetworkListener listener = new NetworkListener(getServerName(), getPort());
         listener.start();
         return listener;
     }

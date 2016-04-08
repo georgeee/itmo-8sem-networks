@@ -9,7 +9,7 @@ import Control.Lens
 newtype EnvGraph  =  EnvGraph Env
 
 instance Show EnvGraph where
-    show (EnvGraph e)  =  "graph environment {\n" ++ entries ++ "}\n"     
+    show (EnvGraph e)  =  "graph environment {\n  layout = circo;\n" ++ entries ++ "}\n"
       where
         entries = do
             entry <- (nodesList <$> envNodes e) ++ (edgesList <$> envEdges e)
@@ -17,23 +17,23 @@ instance Show EnvGraph where
 
         nodesList :: Node -> String
         nodesList = liftM3 (printf "%s [label=\"%s\", color=\"%s\", style=filled];") id id nodeColor
-       
+
         edgesList :: (BridgeId, (Node, Node)) -> String
         edgesList (bid, (n1, n2)) = printf "%s -- %s [label=\"%d\", color=\"%s\"];" n1 n2 bid (edgeColor bid)
-        
+
         nodeColor :: Node -> String
-        nodeColor n 
-            | n `elem` envClients e 
+        nodeColor n
+            | n `elem` envClients e
            && n `elem` envServers e  =  "cyan3"
             | n `elem` envClients e  =  "green"
             | n `elem` envServers e  =  "blue"
             | otherwise              =  "gray"
 
         edgeColor :: BridgeId -> String
-        edgeColor  
+        edgeColor
             | length (envBridges e) <= 8  =  printf "/accent8/%d"
             | otherwise                   =  const "black"
-        
+
 instance Output EnvGraph where
-    defName _  =  "graph.dot" 
-           
+    defName _  =  "graph.dot"
+

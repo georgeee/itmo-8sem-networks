@@ -8,6 +8,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.Inet6Address;
 import java.nio.ByteBuffer;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Scanner;
@@ -24,6 +25,7 @@ public class ConsoleListener implements Runnable {
 
     @Override
     public void run() {
+        DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
         try (DatagramSocket socket = new DatagramSocket()) {
             socket.setSoTimeout(6969);
             String cmd;
@@ -37,13 +39,13 @@ public class ConsoleListener implements Runnable {
                     DatagramPacket outPacket = new DatagramPacket(outData, outData.length, Inet6Address.getByName(ipV6Address), port);
                     socket.send(outPacket);
                     try {
-                        byte[] inData = new byte[8];
+                        byte[] inData = new byte[256];
                         DatagramPacket inPacket = new DatagramPacket(inData, inData.length);
                         socket.receive(inPacket);
-                        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-                        buffer.put(inData, 0, inData.length);
+                        ByteBuffer buffer = ByteBuffer.wrap(inPacket.getData(), inPacket.getOffset(), inPacket.getLength());
                         long time = buffer.getLong(0);
-                        System.out.println("Vremechko: " + new SimpleDateFormat("HH:mm:ss.SSS").format(new Date(time)));
+                        String serverName = new String(inPacket.getData(), inPacket.getOffset() + Long.BYTES, inPacket.getLength() - Long.BYTES);
+                        System.out.printf("Vremechko (server %s): %s%n", serverName, dateFormat.format(new Date(time)));
                     } catch (IOException e) {
                         log.error("Time getting error", e);
                     }
