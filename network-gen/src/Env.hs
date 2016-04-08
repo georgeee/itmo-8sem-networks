@@ -27,8 +27,6 @@ data Bridge  =  Bridge
 data Env  =  Env
     { envNodes      :: [Node]
     , envBridges    :: [Bridge]
-    , envServers    :: [Node]
-    , envClients    :: [Node]
     , envDevStartNo :: Int
     } deriving (Show)
 
@@ -69,20 +67,18 @@ type ServerNodeName  =  String
 type ClientNodeName  =  String
 type DevStartNo  =  Int
 
-env0 :: [NodeName] -> DevStartNo -> [ServerNodeName] -> [ClientNodeName] -> [Bridge] -> Env
-env0 nodes devNo servers clients bridges  =  either error id $ checkEnv $ Env
+env0 :: [NodeName] -> DevStartNo -> [Bridge] -> Env
+env0 nodes devNo bridges  =  either error id $ checkEnv $ Env
     { envNodes      = readNode   <$> nodes
     , envBridges    = bridges
-    , envServers    = readNode   <$> servers
-    , envClients    = readNode   <$> clients
     , envDevStartNo = devNo
     }
 
-env1 :: [NodeName] -> [ServerNodeName] -> [ClientNodeName] -> [Bridge] -> Env
+env1 :: [NodeName] -> [Bridge] -> Env
 env1 ns  =  env0 ns 4
 
 env :: [NodeName] -> [Bridge] -> Env
-env ns  =  env1 ns [] []
+env ns  =  env1 ns 
 
 br1 :: BridgeId -> InetEnabled -> [NodeName] -> Bridge
 br1 id ie ns  =  Bridge ie id $ map readNode ns
@@ -97,8 +93,6 @@ checkEnv e@Env{..}  =  e <$ do
     maybe (Right ()) (Left . printf "Duplicate bridge id: %d") $ findDups $ bridgeId <$> envBridges
   where
     usedNodes = (envBridges >>= bridgeNodes)
-             ++ envServers
-             ++ envClients
 
     checkNodeDefined n = unless (n `elem` envNodes) $ Left $ printf "Node %s is not within node list" n
 

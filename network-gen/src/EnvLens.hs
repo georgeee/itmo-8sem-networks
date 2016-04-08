@@ -7,8 +7,6 @@ module EnvLens
     ( nodes
     , ofType
     , bridges
-    , servers
-    , clients
     , startDevNo
     , iid      
     , bid
@@ -29,8 +27,6 @@ import Control.Monad.State
                                      
 makeLensesFor 
     [ ("envNodes"      , "_envNodes" )
-    , ("envServers"    , "_servers"  )
-    , ("envClients"    , "_clients"  )
     , ("envBridges"    , "bridges"   )
     , ("envDevStartNo" , "startDevNo")
     ] ''Env                              
@@ -71,8 +67,6 @@ instance WithId Bridge BridgeId where
 newEnv :: State Env () -> Env      
 newEnv  =  either error id . checkEnv . flip execState Env 
     { envNodes = []
-    , envServers = []
-    , envClients = []
     , envBridges = []
     , envDevStartNo = 4
     }
@@ -83,13 +77,6 @@ newBridge  =  flip execState Bridge
     , bridgeId = 0
     , bridgeInetEnabled = True                              
     }
-
-servers :: NodeLike n => Lens' Env [n]
-servers  =  _servers . mapping (from asNode)
-
-clients :: NodeLike n => Lens' Env [n]
-clients  =  _clients . mapping (from asNode)
-
 
 ofType :: String -> Lens' [Node] [Int8]
 ofType t  =  lens get set 

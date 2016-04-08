@@ -25,23 +25,30 @@ instance Show EnvGraph where
         edgesList :: (BridgeId, (Node, Node)) -> String
         edgesList (bid, (n1, n2)) = printf "%s -- %s [label=\"%d\", color=\"%s\"];" n1 n2 bid (edgeColor bid)
 
+        -- color stuff
         nodeColor :: Node -> String
-        nodeColor n
-            | n `elem` envClients e
-           && n `elem` envServers e  =  "cyan3"
-            | n `elem` envClients e  =  "green"
-            | n `elem` envServers e  =  "blue"
-            | otherwise              =  "gray"
+        nodeColor n =  
+            let colored = M.size nodeTypes <= 8
+            in  if useNodeColors
+                    then printf "/accent8/%d" $ fromJust $ M.lookup (nodeType n) nodeTypes
+                    else "gray"
 
         edgeColor :: BridgeId -> String
         edgeColor bid
-            | length (envBridges e) <= 8  =  printf "/accent8/%d" $ fromJust $ M.lookup bid bridgeIds
+            | length (envBridges e) <= 8  =  printf "/dark28/%d" $ fromJust $ M.lookup bid bridgeIds
             | otherwise                   =  "black"
 
+        useNodeColors :: Bool
+        useNodeColors = M.size nodeTypes <= 8
+
         bridgeIds :: M.Map BridgeId Int
-        bridgeIds  =  let allIds = L.nub $ bridgeId <$> envBridges e
-                      in  M.fromList $ zip allIds [1..] 
-                                         
+        bridgeIds = let allIds = L.nub $ bridgeId <$> envBridges e
+                    in  M.fromList $ zip allIds [1..] 
+ 
+        nodeTypes :: M.Map String Int
+        nodeTypes = let allTypes = L.nub $ (++) ["c", "l"] $ nodeType <$> envNodes e
+                    in  M.fromList $ zip allTypes [1..]
+                                        
 instance Output EnvGraph where
     defName _  =  "graph.dot"
 

@@ -8,8 +8,6 @@ import Data.Foldable (for_)
 simpleNet :: Env
 simpleNet  =  newEnv $ do
     nodes      .= ["m1", "m2", "s1"]
-    servers    .= ["m1"]
-    clients    .= ["s1"]
     startDevNo .= 5
 
     bridges <:= newBridge $> do
