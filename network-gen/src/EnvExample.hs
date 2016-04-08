@@ -13,14 +13,13 @@ simpleNet  =  newEnv $ do
     startDevNo .= 5
 
     bridges <:= newBridge $> do
-        bid      .= 1
         nodes    .= ["m1", "m2"]
         ie       .= False
 
     bridges <:= newBridge $> do
-        bid      .= 2
         nodes    .= ["m1", "s1"]
 
+    bridges %= renum
 
 cycleNet :: Int8 -> Env
 cycleNet m  =  newEnv $ do
@@ -31,14 +30,15 @@ cycleNet m  =  newEnv $ do
         bridges <:= newBridge $> do
             nodes.ofType "m" .= [k]
             nodes.ofType "s" .= [k]
+            bid .= fromIntegral k
     
     for_ (circle m) $ \(n1, n2) -> 
         bridges <:= newBridge $> do
             nodes.ofType "m" .= [n1, n2]
+            bid .= fromIntegral (n1 * 10 + n2)
     
-    bridges %= renum  -- auto bridge ids distribution
   where
     circle :: (Enum a, Integral a) => a -> [(a, a)]
     circle k  =  [(x, mod x k + 1) | x <- [1..k]]
         
-    
+

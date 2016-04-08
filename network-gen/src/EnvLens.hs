@@ -15,7 +15,6 @@ module EnvLens
     , ie 
     , ($>)            
     , (<:=)
-    , (<++=)
     , newEnv
     , newBridge
     , renum
@@ -101,13 +100,9 @@ ofType t  =  lens get set
 renum :: WithId o i => [o] -> [o]
 renum  =  zipWith (set iid) [1..]
 
-infixr 4 <++=
-(<++=) :: MonadState s m => ASetter s s [a] [a] -> [a] -> m ()
-s <++= e  =  s %= ( ++ e)
-
 infixr 4 <:=
 (<:=) :: MonadState s m => ASetter s s [a] [a] -> a -> m ()
-s <:= e  =  s <++= [e]
+s <:= e  =  s <>= [e]
 
 infixr 9 $>
 ($>) :: (a -> b) -> a -> b
