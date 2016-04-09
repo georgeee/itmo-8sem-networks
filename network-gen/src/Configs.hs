@@ -45,4 +45,25 @@ anycastTest1 = env ["mc1", "m2", "m3", "ms4", "m5", "ms6", "m7"]
                    , br 71 ["m7", "mc1"]
                    ]
 
+anycastTest2 = env [ "mc1", "m2", "m3", "m4", "ms5", "m6", "ms7"]
+                   [ br 12 ["mc1", "m2"]
+                   , br 14 ["mc1", "m4"]
+                   , br 16 ["mc1", "m6"]
+                   , br 23 ["m2", "m3"]
+                   , br 34 ["m3", "m4"]
+                   , br 45 ["m4", "ms5"]
+                   , br 67 ["m6", "ms7"]
+                   ]
 
+anycastTest3 = env [ "mc1", "m2", "ms3", "ms4", "ms5", "m6", "m7", "ms8"]
+                   [ br 12 ["mc1", "m2"]
+                   , br 23 ["m2", "ms3"]
+                   , br 24 ["m2", "ms4"]
+                   , br 25 ["m2", "ms5"]
+                   , br 16 ["mc1", "m6"]
+                   , br 67 ["m6", "m7"]
+                   , br 78 ["m7", "ms8"]
+                   ]
+
+
+                   
